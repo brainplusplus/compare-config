@@ -25,11 +25,11 @@ A Web for compare configuration from several type of file config
 
 ## Screenshots
 
-#### API (Swagger UI) 
+#### Compare Config Keys (.env)
 
 ![App Screenshot](/screenshots/compare_config_env_keys.png)
 
-#### Running Test
+#### Compare Config Values (.env)
 
 ![App Screenshot](/screenshots/compare_config_env_values.png)
 ## Tech Stack
