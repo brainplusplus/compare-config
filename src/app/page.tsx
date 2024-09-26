@@ -1,101 +1,234 @@
-import Image from "next/image";
+// pages/index.js
+"use client"
+import { useState, useEffect  } from 'react';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
+import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
+import dotenv from 'dotenv';
 
-export default function Home() {
+  const parseEnv = (envString: string) => {
+    return dotenv.parse(envString);
+  };
+
+  interface ComparisonResult {
+    key: string;
+    config1Value: string;
+    config2Value: string;
+    description: string;
+  }
+  
+  export default function Home() {
+    const [config1, setConfig1] = useState('');
+    const [config2, setConfig2] = useState('');
+    const [compareType, setCompareType] = useState('all');
+    const [config1Type, setConfig1Type] = useState('.env');
+    const [config2Type, setConfig2Type] = useState('.env');
+    const [comparisonResult, setComparisonResult] = useState<ComparisonResult[]>([]);
+    const [differentValuesResult, setDifferentValuesResult] = useState<ComparisonResult[]>([]);
+
+    const parseEnv = (envString: string) => {
+      return dotenv.parse(envString);
+    };
+    const handleCompare = () => {
+      const parsedConfig1 = config1Type === '.env' ? parseEnv(config1) : {};
+      const parsedConfig2 = config2Type === '.env' ? parseEnv(config2) : {};
+  
+      const allKeys = new Set([...Object.keys(parsedConfig1), ...Object.keys(parsedConfig2)]);
+      const result: ComparisonResult[] = Array.from(allKeys).map((key) => {
+        const config1Value = parsedConfig1[key] || '-';
+        const config2Value = parsedConfig2[key] || '-';
+        let description = '';
+  
+        if (config1Value === '-') {
+          description = `Config 1 missing ${key}`;
+        } else if (config2Value === '-') {
+          description = `Config 2 missing ${key}`;
+        }
+  
+        return {
+          key,
+          config1Value,
+          config2Value,
+          description,
+        };
+      });
+  
+      const filteredResult = result.filter(({ config1Value, config2Value }) => {
+        if (compareType === 'config1') {
+          return config1Value === '-';
+        } else if (compareType === 'config2') {
+          return config2Value === '-';
+        }
+        return true; // 'all'
+      });
+  
+      setComparisonResult(filteredResult);
+  
+      const differentValues = Array.from(allKeys).map((key) => {
+        const config1Value = parsedConfig1[key] || '-';
+        const config2Value = parsedConfig2[key] || '-';
+        let description = '';
+  
+        if (config1Value !== '-' && config2Value !== '-' && config1Value !== config2Value) {
+          description = 'Different Value';
+        }
+  
+        return {
+          key,
+          config1Value,
+          config2Value,
+          description,
+        };
+      }).filter(({ description }) => description !== '');
+  
+      setDifferentValuesResult(differentValues);
+    };
+
+    useEffect(() => {
+      handleCompare();
+    }, [compareType]);
+
   return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="https://nextjs.org/icons/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-semibold">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
-
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="https://nextjs.org/icons/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:min-w-44"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+    <div className="flex flex-col items-center mt-10">
+      <div className="flex justify-between w-3/4 mb-10">
+        <div className="flex flex-col w-2/5">
+          <label className="font-bold mb-2">Config 1</label>
+          <Select onValueChange={(val) => setConfig1Type(val)}>
+            <SelectTrigger className="w-[180px]">
+              <SelectValue placeholder={config1Type || 'Select'} />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value=".env" >
+                .env
+              </SelectItem>
+              <SelectItem value="config.go">
+                config.go
+              </SelectItem>
+            </SelectContent>
+          </Select>
+          <Textarea
+            className="p-2 border rounded mt-2"
+            placeholder="Type here"
+            value={config1}
+            onChange={(e) => setConfig1(e.target.value)}
+          />
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
+        <div className="flex flex-col w-2/5">
+          <label className="font-bold mb-2">Config 2</label>
+          <Select onValueChange={(val) => setConfig2Type(val)}>
+            <SelectTrigger className="w-[180px]">
+              <SelectValue placeholder={config2Type || 'Select'} />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value=".env">
+                .env
+              </SelectItem>
+              <SelectItem value="config.go">
+                config.go
+              </SelectItem>
+            </SelectContent>
+          </Select>
+          <Textarea
+            className="p-2 border rounded mt-2"
+            placeholder="Type here"
+            value={config2}
+            onChange={(e) => setConfig2(e.target.value)}
           />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+        </div>
+      </div>
+      <Button className="p-2 mb-10 bg-blue-500 text-white rounded" onClick={handleCompare}>
+        Compare
+      </Button>
+      <Tabs defaultValue="keys" className="w-3/4">
+        <TabsList className="flex justify-center mb-4">
+          <TabsTrigger value="keys" className="p-2 border rounded mr-2">
+            Compare Keys
+          </TabsTrigger>
+          <TabsTrigger value="values" className="p-2 border rounded">
+            Compare Value
+          </TabsTrigger>
+        </TabsList>
+        <TabsContent value="keys" className="border p-4 rounded">
+          <div className="mb-4">
+            <input
+              type="radio"
+              name="compareType"
+              value="all"
+              checked={compareType === 'all'}
+              onChange={() => setCompareType('all')}
+              className="mr-2"
+            />{' '}
+            Show All
+            <input
+              type="radio"
+              name="compareType"
+              value="config1"
+              checked={compareType === 'config1'}
+              onChange={() => setCompareType('config1')}
+              className="ml-4 mr-2"
+            />{' '}
+            Only Config 1
+            <input
+              type="radio"
+              name="compareType"
+              value="config2"
+              checked={compareType === 'config2'}
+              onChange={() => setCompareType('config2')}
+              className="ml-4 mr-2"
+            />{' '}
+            Only Config 2
+          </div>
+          <table className="w-full border-collapse">
+            <thead>
+              <tr>
+                <th className="border p-2">Key</th>
+                <th className="border p-2">Config 1</th>
+                <th className="border p-2">Config 2</th>
+                <th className="border p-2">Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              {comparisonResult.map(({ key, config1Value, config2Value, description }) => (
+                <tr key={key}>
+                  <td className="border p-2">{key}</td>
+                  <td className="border p-2">{config1Value}</td>
+                  <td className="border p-2">{config2Value}</td>
+                  <td className="border p-2">{description}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </TabsContent>
+        <TabsContent value="values" className="border p-4 rounded">
+          <table className="w-full border-collapse">
+            <thead>
+              <tr>
+                <th className="border p-2">Key</th>
+                <th className="border p-2">Config 1</th>
+                <th className="border p-2">Config 2</th>
+                <th className="border p-2">Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              {differentValuesResult.map(({ key, config1Value, config2Value, description }) => (
+                <tr key={key}>
+                  <td className="border p-2">{key}</td>
+                  <td className="border p-2">{config1Value}</td>
+                  <td className="border p-2">{config2Value}</td>
+                  <td className="border p-2">{description}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }
