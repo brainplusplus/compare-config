@@ -12,10 +12,34 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import dotenv from 'dotenv';
+import YAML from 'yaml'
+import * as yaml from 'js-yaml';
 
-  const parseEnv = (envString: string) => {
-    return dotenv.parse(envString);
+
+  const parseEnv = (configString: string) => {
+    return dotenv.parse(configString);
   };
+
+  const parseYAML = (configString: string) => {
+    return flattenObject(yaml.load(configString));
+  };
+
+  function flattenObject(obj: any, prefix = ''): Record<string, any> {
+    let flattened: Record<string, any> = {};
+  
+    for (const key in obj) {
+      if (obj.hasOwnProperty(key)) {
+        const newKey = prefix ? `${prefix}.${key}` : key;
+        if (typeof obj[key] === 'object' && obj[key] !== null) {
+          Object.assign(flattened, flattenObject(obj[key], newKey));
+        } else {
+          flattened[newKey] = obj[key];
+        }
+      }
+    }
+  
+    return flattened;
+  }
 
   interface ComparisonResult {
     key: string;
@@ -37,11 +61,13 @@ import dotenv from 'dotenv';
       return dotenv.parse(envString);
     };
     const handleCompare = () => {
-      const parsedConfig1 = config1Type === '.env' ? parseEnv(config1) : {};
-      const parsedConfig2 = config2Type === '.env' ? parseEnv(config2) : {};
-  
+      const parsedConfig1 = config1Type === '.env' ? parseEnv(config1) : config1Type === '.yaml' ? parseYAML(config1) : {};
+      const parsedConfig2 = config2Type === '.env' ? parseEnv(config2) : config2Type === '.yaml' ? parseYAML(config2) : {};
+      console.log(parsedConfig1)
       const allKeys = new Set([...Object.keys(parsedConfig1), ...Object.keys(parsedConfig2)]);
+      console.log(allKeys)
       const result: ComparisonResult[] = Array.from(allKeys).map((key) => {
+        console.log(key)
         const config1Value = parsedConfig1[key] || '-';
         const config2Value = parsedConfig2[key] || '-';
         let description = '';
@@ -51,11 +77,13 @@ import dotenv from 'dotenv';
         } else if (config2Value === '-') {
           description = `Config 2 missing ${key}`;
         }
-  
+        const valConfig1: string = Array.isArray(config1Value) ? JSON.stringify(config1Value) : config1Value;
+        const valConfig2: string = Array.isArray(config2Value) ? JSON.stringify(config2Value) : config2Value;
+
         return {
           key,
-          config1Value,
-          config2Value,
+          config1Value: valConfig1,
+          config2Value: valConfig2,
           description,
         };
       });
@@ -80,10 +108,13 @@ import dotenv from 'dotenv';
           description = 'Different Value';
         }
   
+        const valConfig1: string = Array.isArray(config1Value) ? JSON.stringify(config1Value) : config1Value;
+        const valConfig2: string = Array.isArray(config2Value) ? JSON.stringify(config2Value) : config2Value;
+
         return {
           key,
-          config1Value,
-          config2Value,
+          config1Value: valConfig1,
+          config2Value: valConfig2,
           description,
         };
       }).filter(({ description }) => description !== '');
@@ -107,6 +138,8 @@ import dotenv from 'dotenv';
             <SelectContent>
               <SelectItem value=".env" >
                 .env
+              </SelectItem><SelectItem value=".yaml">
+                .yaml
               </SelectItem>
               <SelectItem value="config.go">
                 config.go
@@ -129,6 +162,9 @@ import dotenv from 'dotenv';
             <SelectContent>
               <SelectItem value=".env">
                 .env
+              </SelectItem>
+              <SelectItem value=".yaml">
+                .yaml
               </SelectItem>
               <SelectItem value="config.go">
                 config.go
@@ -185,7 +221,7 @@ import dotenv from 'dotenv';
             />{' '}
             Only Config 2
           </div>
-          <table className="w-full border-collapse">
+          <table className="table-fixed w-full border-collapse border border-gray-200">
             <thead>
               <tr>
                 <th className="border p-2">Key</th>
@@ -197,17 +233,17 @@ import dotenv from 'dotenv';
             <tbody>
               {comparisonResult.map(({ key, config1Value, config2Value, description }) => (
                 <tr key={key}>
-                  <td className="border p-2">{key}</td>
-                  <td className="border p-2">{config1Value}</td>
-                  <td className="border p-2">{config2Value}</td>
-                  <td className="border p-2">{description}</td>
+                  <td className="border p-2 break-all">{key}</td>
+                  <td className="border p-2 break-all">{config1Value}</td>
+                  <td className="border p-2 break-all">{config2Value}</td>
+                  <td className="border p-2 break-all">{description}</td>
                 </tr>
               ))}
             </tbody>
           </table>
         </TabsContent>
         <TabsContent value="values" className="border p-4 rounded">
-          <table className="w-full border-collapse">
+          <table className="table-fixed w-full border-collapse border border-gray-200">
             <thead>
               <tr>
                 <th className="border p-2">Key</th>
@@ -219,10 +255,10 @@ import dotenv from 'dotenv';
             <tbody>
               {differentValuesResult.map(({ key, config1Value, config2Value, description }) => (
                 <tr key={key}>
-                  <td className="border p-2">{key}</td>
-                  <td className="border p-2">{config1Value}</td>
-                  <td className="border p-2">{config2Value}</td>
-                  <td className="border p-2">{description}</td>
+                  <td className="border p-2 break-all">{key}</td>
+                  <td className="border p-2 break-all">{config1Value}</td>
+                  <td className="border p-2 break-all">{config2Value}</td>
+                  <td className="border p-2 break-all">{description}</td>
                 </tr>
               ))}
             </tbody>
