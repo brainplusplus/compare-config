@@ -14,6 +14,7 @@ import { Textarea } from "@/components/ui/textarea";
 import dotenv from 'dotenv';
 import YAML from 'yaml'
 import * as yaml from 'js-yaml';
+import { env } from 'process';
 
 
   const parseEnv = (configString: string) => {
@@ -60,14 +61,36 @@ import * as yaml from 'js-yaml';
     const parseEnv = (envString: string) => {
       return dotenv.parse(envString);
     };
+
+    function parseGoConfig(envString: string): { [key: string]: string } {
+    
+        const regex = /\b\w+\.(?:Get(?:String|Bool|Int|Duration|Int64|Int32|Float64|IntSlice|SizeInBytes|StringMap|StringMapString|StringSlice|StringMapStringSlice|Time|Uint|Uint16|Uint32|Uint64)|Getenv)\("([^"]+)"\)/g;
+
+        const resultMap: Record<string, string> = {};
+        let match;
+
+        // Extract all matches
+        while ((match = regex.exec(envString)) !== null) {
+            const key = match[1];
+            resultMap[key] = '';
+        }
+
+        return resultMap;
+    }
+
+    const parseConfig = (configType: string, envString: string) => {
+        switch(configType){
+            case ".yaml": return parseYAML(envString);
+            case "config.go": return parseGoConfig(envString);
+            default: return parseEnv(envString);
+        }
+    };
+
     const handleCompare = () => {
-      const parsedConfig1 = config1Type === '.env' ? parseEnv(config1) : config1Type === '.yaml' ? parseYAML(config1) : {};
-      const parsedConfig2 = config2Type === '.env' ? parseEnv(config2) : config2Type === '.yaml' ? parseYAML(config2) : {};
-      console.log(parsedConfig1)
+      const parsedConfig1 =  parseConfig(config1Type, config1);
+      const parsedConfig2 =  parseConfig(config2Type, config2);
       const allKeys = new Set([...Object.keys(parsedConfig1), ...Object.keys(parsedConfig2)]);
-      console.log(allKeys)
       const result: ComparisonResult[] = Array.from(allKeys).map((key) => {
-        console.log(key)
         const config1Value = parsedConfig1[key] || '-';
         const config2Value = parsedConfig2[key] || '-';
         let description = '';
@@ -142,7 +165,7 @@ import * as yaml from 'js-yaml';
                 .yaml
               </SelectItem>
               <SelectItem value="config.go">
-                config.go
+                config in .go file
               </SelectItem>
             </SelectContent>
           </Select>
@@ -167,7 +190,7 @@ import * as yaml from 'js-yaml';
                 .yaml
               </SelectItem>
               <SelectItem value="config.go">
-                config.go
+                config in .go file
               </SelectItem>
             </SelectContent>
           </Select>
