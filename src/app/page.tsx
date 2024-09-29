@@ -11,36 +11,7 @@ import {
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import dotenv from 'dotenv';
-import YAML from 'yaml'
-import * as yaml from 'js-yaml';
-import { env } from 'process';
-
-
-  const parseEnv = (configString: string) => {
-    return dotenv.parse(configString);
-  };
-
-  const parseYAML = (configString: string) => {
-    return flattenObject(yaml.load(configString));
-  };
-
-  function flattenObject(obj: any, prefix = ''): Record<string, any> {
-    let flattened: Record<string, any> = {};
-  
-    for (const key in obj) {
-      if (obj.hasOwnProperty(key)) {
-        const newKey = prefix ? `${prefix}.${key}` : key;
-        if (typeof obj[key] === 'object' && obj[key] !== null) {
-          Object.assign(flattened, flattenObject(obj[key], newKey));
-        } else {
-          flattened[newKey] = obj[key];
-        }
-      }
-    }
-  
-    return flattened;
-  }
+import { parseConfig } from '@/parsers/config_parser';
 
   interface ComparisonResult {
     key: string;
@@ -57,34 +28,6 @@ import { env } from 'process';
     const [config2Type, setConfig2Type] = useState('.env');
     const [comparisonResult, setComparisonResult] = useState<ComparisonResult[]>([]);
     const [differentValuesResult, setDifferentValuesResult] = useState<ComparisonResult[]>([]);
-
-    const parseEnv = (envString: string) => {
-      return dotenv.parse(envString);
-    };
-
-    function parseGoConfig(envString: string): { [key: string]: string } {
-    
-        const regex = /\b\w+\.(?:Get(?:String|Bool|Int|Duration|Int64|Int32|Float64|IntSlice|SizeInBytes|StringMap|StringMapString|StringSlice|StringMapStringSlice|Time|Uint|Uint16|Uint32|Uint64)|Getenv)\("([^"]+)"\)/g;
-
-        const resultMap: Record<string, string> = {};
-        let match;
-
-        // Extract all matches
-        while ((match = regex.exec(envString)) !== null) {
-            const key = match[1];
-            resultMap[key] = '';
-        }
-
-        return resultMap;
-    }
-
-    const parseConfig = (configType: string, envString: string) => {
-        switch(configType){
-            case ".yaml": return parseYAML(envString);
-            case "config.go": return parseGoConfig(envString);
-            default: return parseEnv(envString);
-        }
-    };
 
     const handleCompare = () => {
       const parsedConfig1 =  parseConfig(config1Type, config1);
@@ -164,6 +107,9 @@ import { env } from 'process';
               </SelectItem><SelectItem value=".yaml">
                 .yaml
               </SelectItem>
+              <SelectItem value=".yaml-base64-value">
+                .yaml-base64-value
+              </SelectItem>
               <SelectItem value="config.go">
                 config in .go file
               </SelectItem>
@@ -188,6 +134,9 @@ import { env } from 'process';
               </SelectItem>
               <SelectItem value=".yaml">
                 .yaml
+              </SelectItem>
+              <SelectItem value=".yaml-base64-value">
+                .yaml-base64-value
               </SelectItem>
               <SelectItem value="config.go">
                 config in .go file
