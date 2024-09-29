@@ -12,81 +12,24 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea";
-import { parseConfig } from '@/parsers/config_parser';
-import { ComparisonResult } from '@/entities/comparison_result';
 import { filterComparisonResultList } from '@/lib/utils';
+import { useHomeHook } from '@/hooks/home_hook';
   
 export default function Home() {
-    const [config1, setConfig1] = useState('');
-    const [config2, setConfig2] = useState('');
-    const [compareType, setCompareType] = useState('all');
-    const [config1Type, setConfig1Type] = useState('.env');
-    const [config2Type, setConfig2Type] = useState('.env');
-    const [comparisonResult, setComparisonResult] = useState<ComparisonResult[]>([]);
-    const [differentValuesResult, setDifferentValuesResult] = useState<ComparisonResult[]>([]);
-    const [searchTermCompareKeys, setSearchTermCompareKeys] = useState('');
-    const [searchCategoryCompareKeys, setSearchCategoryCompareKeys] = useState('All');
-    const [searchTermCompareValues, setSearchTermCompareValues] = useState('');
-    const [searchCategoryCompareValues, setSearchCategoryCompareValues] = useState('All');
-
-    const handleCompare = () => {
-      const parsedConfig1 =  parseConfig(config1Type, config1);
-      const parsedConfig2 =  parseConfig(config2Type, config2);
-      const allKeys = new Set([...Object.keys(parsedConfig1), ...Object.keys(parsedConfig2)]);
-      const result: ComparisonResult[] = Array.from(allKeys).map((key) => {
-        const config1Value = parsedConfig1[key] || '-';
-        const config2Value = parsedConfig2[key] || '-';
-        let description = '';
-  
-        if (config1Value === '-') {
-          description = `Config 1 missing ${key}`;
-        } else if (config2Value === '-') {
-          description = `Config 2 missing ${key}`;
-        }
-        const valConfig1: string = Array.isArray(config1Value) ? JSON.stringify(config1Value) : config1Value;
-        const valConfig2: string = Array.isArray(config2Value) ? JSON.stringify(config2Value) : config2Value;
-
-        return {
-          key,
-          config1Value: valConfig1,
-          config2Value: valConfig2,
-          description,
-        };
-      });
-  
-      const filteredResult = result.filter(({ config1Value, config2Value }) => {
-        if (compareType === 'config1') {
-          return config1Value === '-';
-        } else if (compareType === 'config2') {
-          return config2Value === '-';
-        }
-        return true; // 'all'
-      });
-  
-      setComparisonResult(filteredResult);
-  
-      const differentValues = Array.from(allKeys).map((key) => {
-        const config1Value = parsedConfig1[key] || '-';
-        const config2Value = parsedConfig2[key] || '-';
-        let description = '';
-  
-        if (config1Value !== '-' && config2Value !== '-' && config1Value !== config2Value) {
-          description = 'Different Value';
-        }
-  
-        const valConfig1: string = Array.isArray(config1Value) ? JSON.stringify(config1Value) : config1Value;
-        const valConfig2: string = Array.isArray(config2Value) ? JSON.stringify(config2Value) : config2Value;
-
-        return {
-          key,
-          config1Value: valConfig1,
-          config2Value: valConfig2,
-          description,
-        };
-      }).filter(({ description }) => description !== '');
-  
-      setDifferentValuesResult(differentValues);
-    };
+    const {
+        config1, setConfig1,
+        config2, setConfig2,
+        compareType, setCompareType,
+        config1Type, setConfig1Type,
+        config2Type, setConfig2Type,
+        comparisonResult, setComparisonResult,
+        differentValuesResult, setDifferentValuesResult,
+        searchTermCompareKeys, setSearchTermCompareKeys,
+        searchCategoryCompareKeys, setSearchCategoryCompareKeys,
+        searchTermCompareValues, setSearchTermCompareValues,
+        searchCategoryCompareValues, setSearchCategoryCompareValues,
+        handleCompare,
+    } = useHomeHook();
 
     const filteredDifferentKeysResult = filterComparisonResultList(comparisonResult, searchTermCompareKeys, searchCategoryCompareKeys);
     const filteredDifferentValuesResult = filterComparisonResultList(differentValuesResult, searchTermCompareValues, searchCategoryCompareValues);
@@ -104,20 +47,20 @@ export default function Home() {
             <label className="font-bold mb-2">Config 1</label>
             <Select onValueChange={(val) => setConfig1Type(val)}>
                 <SelectTrigger className="w-[180px]">
-                <SelectValue placeholder={config1Type || 'Select'} />
+                    <SelectValue placeholder={config1Type || 'Select'} />
                 </SelectTrigger>
                 <SelectContent>
-                <SelectItem value=".env" >
-                    .env
-                </SelectItem><SelectItem value=".yaml">
-                    .yaml
-                </SelectItem>
-                <SelectItem value=".yaml-base64-value">
-                    .yaml-base64-value
-                </SelectItem>
-                <SelectItem value="config.go">
-                    config in .go file
-                </SelectItem>
+                    <SelectItem value=".env" >
+                        .env
+                    </SelectItem><SelectItem value=".yaml">
+                        .yaml
+                    </SelectItem>
+                    <SelectItem value=".yaml-base64-value">
+                        .yaml-base64-value
+                    </SelectItem>
+                    <SelectItem value="config.go">
+                        config in .go file
+                    </SelectItem>
                 </SelectContent>
             </Select>
             <Textarea
@@ -131,21 +74,21 @@ export default function Home() {
             <label className="font-bold mb-2">Config 2</label>
             <Select onValueChange={(val) => setConfig2Type(val)}>
                 <SelectTrigger className="w-[180px]">
-                <SelectValue placeholder={config2Type || 'Select'} />
+                    <SelectValue placeholder={config2Type || 'Select'} />
                 </SelectTrigger>
                 <SelectContent>
-                <SelectItem value=".env">
-                    .env
-                </SelectItem>
-                <SelectItem value=".yaml">
-                    .yaml
-                </SelectItem>
-                <SelectItem value=".yaml-base64-value">
-                    .yaml-base64-value
-                </SelectItem>
-                <SelectItem value="config.go">
-                    config in .go file
-                </SelectItem>
+                    <SelectItem value=".env">
+                        .env
+                    </SelectItem>
+                    <SelectItem value=".yaml">
+                        .yaml
+                    </SelectItem>
+                    <SelectItem value=".yaml-base64-value">
+                        .yaml-base64-value
+                    </SelectItem>
+                    <SelectItem value="config.go">
+                        config in .go file
+                    </SelectItem>
                 </SelectContent>
             </Select>
             <Textarea
@@ -161,45 +104,45 @@ export default function Home() {
         </Button>
         <Tabs defaultValue="keys" className="w-3/4">
             <TabsList className="flex justify-center mb-4">
-            <TabsTrigger value="keys" className="p-2 border rounded mr-2">
-                Compare Keys
-            </TabsTrigger>
-            <TabsTrigger value="values" className="p-2 border rounded">
-                Compare Value
-            </TabsTrigger>
+                <TabsTrigger value="keys" className="p-2 border rounded mr-2">
+                    Compare Keys
+                </TabsTrigger>
+                <TabsTrigger value="values" className="p-2 border rounded">
+                    Compare Value
+                </TabsTrigger>
             </TabsList>
             <TabsContent value="keys" className="border p-4 rounded">
             
             <div className="p-4">
-            <div className="flex mb-4">
-                <input
-                type="radio"
-                name="compareType"
-                value="all"
-                checked={compareType === 'all'}
-                onChange={() => setCompareType('all')}
-                className="mr-2"
-                />{' '}
-                Show All
-                <input
-                type="radio"
-                name="compareType"
-                value="config1"
-                checked={compareType === 'config1'}
-                onChange={() => setCompareType('config1')}
-                className="ml-4 mr-2"
-                />{' '}
-                Only Config 1
-                <input
-                type="radio"
-                name="compareType"
-                value="config2"
-                checked={compareType === 'config2'}
-                onChange={() => setCompareType('config2')}
-                className="ml-4 mr-2"
-                />{' '}
-                Only Config 2
-            </div>
+                    <div className="flex mb-4">
+                        <input
+                            type="radio"
+                            name="compareType"
+                            value="all"
+                            checked={compareType === 'all'}
+                            onChange={() => setCompareType('all')}
+                            className="mr-2"
+                        />{' '}
+                        Show All
+                        <input
+                            type="radio"
+                            name="compareType"
+                            value="config1"
+                            checked={compareType === 'config1'}
+                            onChange={() => setCompareType('config1')}
+                            className="ml-4 mr-2"
+                        />{' '}
+                        Only Config 1
+                        <input
+                            type="radio"
+                            name="compareType"
+                            value="config2"
+                            checked={compareType === 'config2'}
+                            onChange={() => setCompareType('config2')}
+                            className="ml-4 mr-2"
+                        />{' '}
+                        Only Config 2
+                    </div>
                     <div className="flex mb-4">
                         <Select onValueChange={(val) => setSearchCategoryCompareKeys(val)}>
                             <SelectTrigger className="w-[180px]">
