@@ -14,7 +14,8 @@ import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea";
 import { filterComparisonResultList } from '@/lib/utils';
 import { useHomeHook } from '@/hooks/home_hook';
-  
+import sampleDataMap from '@/mocks/config_mock';
+
 export default function Home() {
     const {
         config1, setConfig1,
@@ -28,6 +29,8 @@ export default function Home() {
         searchCategoryCompareKeys, setSearchCategoryCompareKeys,
         searchTermCompareValues, setSearchTermCompareValues,
         searchCategoryCompareValues, setSearchCategoryCompareValues,
+        loadSampleData,
+        loadFromFile,
         handleCompare,
     } = useHomeHook();
 
@@ -46,39 +49,15 @@ export default function Home() {
             <div className="flex flex-col w-2/5">
             <label className="font-bold mb-2">Config 1</label>
             <Select onValueChange={(val) => setConfig1Type(val)}>
-                <SelectTrigger className="w-[180px]">
+                <SelectTrigger className="full-w">
                     <SelectValue placeholder={config1Type || 'Select'} />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="full-w">
                     <SelectItem value=".env" >
                         .env
-                    </SelectItem><SelectItem value=".yaml">
-                        .yaml
                     </SelectItem>
-                    <SelectItem value=".yaml-base64-value">
-                        .yaml-base64-value
-                    </SelectItem>
-                    <SelectItem value="config.go">
-                        config in .go file
-                    </SelectItem>
-                </SelectContent>
-            </Select>
-            <Textarea
-                className="p-2 border rounded mt-2"
-                placeholder="Type here"
-                value={config1}
-                onChange={(e) => setConfig1(e.target.value)}
-            />
-            </div>
-            <div className="flex flex-col w-2/5">
-            <label className="font-bold mb-2">Config 2</label>
-            <Select onValueChange={(val) => setConfig2Type(val)}>
-                <SelectTrigger className="w-[180px]">
-                    <SelectValue placeholder={config2Type || 'Select'} />
-                </SelectTrigger>
-                <SelectContent>
-                    <SelectItem value=".env">
-                        .env
+                    <SelectItem value=".properties" >
+                        .properties
                     </SelectItem>
                     <SelectItem value=".yaml">
                         .yaml
@@ -91,6 +70,53 @@ export default function Home() {
                     </SelectItem>
                 </SelectContent>
             </Select>
+            <Button onClick={() => loadSampleData(sampleDataMap,"1",config1Type, setConfig1)} >
+                Load Sample Data
+            </Button>
+            <Input
+                placeholder="Upload File"
+                type="file"
+                accept=".yaml, .env, .go, .properties"
+                onChange={(event) => loadFromFile(event, setConfig1)} />
+            <Textarea
+                className="p-2 border rounded mt-2"
+                placeholder="Type here"
+                value={config1}
+                onChange={(e) => setConfig1(e.target.value)}
+            />
+            </div>
+            <div className="flex flex-col w-2/5">
+            <label className="font-bold mb-2">Config 2</label>
+            <Select onValueChange={(val) => setConfig2Type(val)}>
+                <SelectTrigger className="full-w">
+                    <SelectValue placeholder={config2Type || 'Select'} />
+                </SelectTrigger>
+                <SelectContent className="full-w">
+                    <SelectItem value=".env">
+                        .env
+                    </SelectItem>
+                    <SelectItem value=".properties" >
+                        .properties
+                    </SelectItem>
+                    <SelectItem value=".yaml">
+                        .yaml
+                    </SelectItem>
+                    <SelectItem value=".yaml-base64-value">
+                        .yaml-base64-value
+                    </SelectItem>
+                    <SelectItem value="config.go">
+                        config in .go file
+                    </SelectItem>
+                </SelectContent>
+            </Select>
+            <Button onClick={() => loadSampleData(sampleDataMap,"2",config2Type, setConfig2)} >
+                Load Sample Data
+            </Button>
+            <Input
+                placeholder="Upload File"
+                type="file"
+                accept=".yaml, .env, .go, .properties"
+                onChange={(event) => loadFromFile(event, setConfig2)} />
             <Textarea
                 className="p-2 border rounded mt-2"
                 placeholder="Type here"

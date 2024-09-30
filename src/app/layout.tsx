@@ -32,7 +32,7 @@ export default function RootLayout({
       >
         <header className="bg-gray-800 text-white p-4">
           <div className="container mx-auto flex justify-between items-center">
-            <div className="text-lg font-bold">Compare Config v0.6</div>
+            <div className="text-lg font-bold">Compare Config v0.7</div>
             <nav>
               <ul className="flex space-x-4">
                 <li><a href="#" className="hover:text-gray-400">Home</a></li>
