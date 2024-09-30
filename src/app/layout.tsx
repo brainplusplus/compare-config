@@ -46,7 +46,7 @@ export default function RootLayout({
         </main>
         <footer className="bg-gray-800 text-white p-4">
           <div className="container mx-auto text-center">
-            &copy; 2024 Brainplusplus. All rights reserved.
+            &copy; 2024 Made with <span className="text-red-500">&hearts;</span> Brainplusplus. All rights reserved.
           </div>
         </footer>
       </body>
