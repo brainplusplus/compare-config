@@ -17,6 +17,7 @@
     "lib": "@/lib",
     "hooks": "@/hooks",
     "parsers": "@/parsers",
-    "entities": "@/entities"
+    "entities": "@/entities",
+    "mocks": "@/mocks"
   }
 }

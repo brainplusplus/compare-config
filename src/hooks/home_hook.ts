@@ -1,8 +1,12 @@
 import { useState, useEffect  } from 'react';
 import { ComparisonResult } from '@/entities/comparison_result';
 import { parseConfig } from '@/parsers/config_parser';
+import {sprintf} from "sprintf-js";
+import * as fs from 'fs';
+import * as path from 'path';
 
 export const useHomeHook = () => {
+    const [sampleDataMap, setSampleDataMap] = useState<Map<string,string>>(new Map<string, string>());
     const [config1, setConfig1] = useState('');
     const [config2, setConfig2] = useState('');
     const [compareType, setCompareType] = useState('all');
@@ -74,6 +78,37 @@ export const useHomeHook = () => {
       setDifferentValuesResult(differentValues);
     };
 
+    const loadSampleData = (sampleDataMap: Map<string, string>, id: string, configType: string, setConfig: any) => {
+      let fileName: string = ""
+      switch(configType){
+        case ".yaml": fileName = sprintf("config%s.yaml",id); break;
+        case ".yaml-base64-value": fileName = sprintf("config%s_b64.yaml",id); break;
+        case "config.go": fileName = sprintf("config%s.go",id); break;
+        case ".properties": fileName = sprintf("config%s.properties",id); break;
+        default: fileName = sprintf("config%s.env",id);
+      }
+      setConfig(sampleDataMap.get(fileName))
+    }
+
+    const loadFromFile = (event: any, setConfig: any) => {
+      const file = event.target.files?.[0];
+      if (file) {
+          const allowedExtensions = ['yaml', 'env', 'go', 'properties'];
+          const fileExtension = file.name.split('.').pop()?.toLowerCase();
+
+          if (fileExtension && allowedExtensions.includes(fileExtension)) {
+              const reader = new FileReader();
+              reader.onload =function(event) {
+                  // The file's text will be printed here
+                  setConfig(event?.target?.result)
+              };
+              reader.readAsText(file);
+          } else {
+              alert('Invalid file type. Please upload a .yaml, .env, .go, or .properties file.');
+          }
+      }
+  }
+
     return {
         config1, setConfig1,
         config2, setConfig2,
@@ -86,6 +121,8 @@ export const useHomeHook = () => {
         searchCategoryCompareKeys, setSearchCategoryCompareKeys,
         searchTermCompareValues, setSearchTermCompareValues,
         searchCategoryCompareValues, setSearchCategoryCompareValues,
+        loadSampleData,
+        loadFromFile,
         handleCompare,
     }
 }
