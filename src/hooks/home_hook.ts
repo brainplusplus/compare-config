@@ -1,9 +1,7 @@
-import { useState, useEffect  } from 'react';
+import { useState, useRef  } from 'react';
 import { ComparisonResult } from '@/entities/comparison_result';
 import { parseConfig } from '@/parsers/config_parser';
 import {sprintf} from "sprintf-js";
-import * as fs from 'fs';
-import * as path from 'path';
 
 export const useHomeHook = () => {
     const [sampleDataMap, setSampleDataMap] = useState<Map<string,string>>(new Map<string, string>());
@@ -18,6 +16,9 @@ export const useHomeHook = () => {
     const [searchCategoryCompareKeys, setSearchCategoryCompareKeys] = useState('All');
     const [searchTermCompareValues, setSearchTermCompareValues] = useState('');
     const [searchCategoryCompareValues, setSearchCategoryCompareValues] = useState('All');
+    const fileInput1Ref = useRef<HTMLInputElement>(null); // Reference to the file input
+    const fileInput2Ref = useRef<HTMLInputElement>(null); // Reference to the file input
+
 
     const handleCompare = () => {
       const parsedConfig1 =  parseConfig(config1Type, config1);
@@ -90,22 +91,37 @@ export const useHomeHook = () => {
       setConfig(sampleDataMap.get(fileName))
     }
 
-    const loadFromFile = (event: any, setConfig: any) => {
+    const loadFromFile = (event: any, setConfig: any, fileInputRef: React.RefObject<HTMLInputElement>) => {
       const file = event.target.files?.[0];
       if (file) {
         const reader = new FileReader();
-        reader.onload =function(event) {
-            // The file's text will be printed here
-            const result = event?.target?.result as string;
-            const isBinary = /[\x00-\x08\x0E-\x1F]/.test(result);
-            if (isBinary) {
-              alert('The file uploaded not valid config file');
-            } else {
-              setConfig(result);
-            }
-        };
+        reader.onload = (e: ProgressEvent<FileReader>) => {
+          const arrayBuffer = e.target?.result as ArrayBuffer;
+          const uint8Array = new Uint8Array(arrayBuffer);
+
+          // Check if the file contains any non-text binary data
+          const isBinary = uint8Array.some((byte) => byte === 0);
+
+          if (isBinary) {
+            alert('The file uploaded not valid config file');
+          } else {
+            // Re-read the file as text to get its content
+            const textReader = new FileReader();
+            textReader.onload = (textEvent: ProgressEvent<FileReader>) => {
+              const textResult = textEvent.target?.result as string;
+              setConfig(textResult); // Set the file content as string
+            };
+            textReader.readAsText(file); // Read as text after confirming it's not binary
+          }
+
+          // Clear the file input after reading the file
+          if (fileInputRef.current) {
+            fileInputRef.current.value = "";
+          }
+        }
+        reader.readAsArrayBuffer(file);
       }
-  }
+    };
 
     return {
         config1, setConfig1,
@@ -119,6 +135,8 @@ export const useHomeHook = () => {
         searchCategoryCompareKeys, setSearchCategoryCompareKeys,
         searchTermCompareValues, setSearchTermCompareValues,
         searchCategoryCompareValues, setSearchCategoryCompareValues,
+        fileInput1Ref,
+        fileInput2Ref,
         loadSampleData,
         loadFromFile,
         handleCompare,

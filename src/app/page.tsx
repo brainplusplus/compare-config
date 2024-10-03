@@ -29,6 +29,8 @@ export default function Home() {
         searchCategoryCompareKeys, setSearchCategoryCompareKeys,
         searchTermCompareValues, setSearchTermCompareValues,
         searchCategoryCompareValues, setSearchCategoryCompareValues,
+        fileInput1Ref,
+        fileInput2Ref,
         loadSampleData,
         loadFromFile,
         handleCompare,
@@ -76,7 +78,7 @@ export default function Home() {
             <Input
                 placeholder="Upload File"
                 type="file"
-                onChange={(event) => loadFromFile(event, setConfig1)} />
+                onChange={(event) => loadFromFile(event, setConfig1, fileInput1Ref)} ref={fileInput1Ref} />
             <Textarea
                 className="p-2 border rounded mt-2"
                 placeholder="Type here"
@@ -114,7 +116,7 @@ export default function Home() {
             <Input
                 placeholder="Upload File"
                 type="file"
-                onChange={(event) => loadFromFile(event, setConfig2)} />
+                onChange={(event) => loadFromFile(event, setConfig2, fileInput2Ref)} ref={fileInput2Ref}  />
             <Textarea
                 className="p-2 border rounded mt-2"
                 placeholder="Type here"
