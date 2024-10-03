@@ -93,19 +93,17 @@ export const useHomeHook = () => {
     const loadFromFile = (event: any, setConfig: any) => {
       const file = event.target.files?.[0];
       if (file) {
-          const allowedExtensions = ['yaml', 'env', 'go', 'properties'];
-          const fileExtension = file.name.split('.').pop()?.toLowerCase();
-
-          if (fileExtension && allowedExtensions.includes(fileExtension)) {
-              const reader = new FileReader();
-              reader.onload =function(event) {
-                  // The file's text will be printed here
-                  setConfig(event?.target?.result)
-              };
-              reader.readAsText(file);
-          } else {
-              alert('Invalid file type. Please upload a .yaml, .env, .go, or .properties file.');
-          }
+        const reader = new FileReader();
+        reader.onload =function(event) {
+            // The file's text will be printed here
+            const result = event?.target?.result as string;
+            const isBinary = /[\x00-\x08\x0E-\x1F]/.test(result);
+            if (isBinary) {
+              alert('The file uploaded not valid config file');
+            } else {
+              setConfig(result);
+            }
+        };
       }
   }
 
