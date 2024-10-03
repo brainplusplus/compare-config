@@ -53,17 +53,17 @@ export default function Home() {
                     <SelectValue placeholder={config1Type || 'Select'} />
                 </SelectTrigger>
                 <SelectContent className="full-w">
-                    <SelectItem value=".env" >
-                        .env
+                    <SelectItem value=".env">
+                        .env (ex: config file in nodejs, go, Laravel, python)
                     </SelectItem>
                     <SelectItem value=".properties" >
-                        .properties
+                        .properties (ex: config file in Spring)
                     </SelectItem>
                     <SelectItem value=".yaml">
-                        .yaml
+                        .yaml (ex: Dockerfile, Dockercompose, .yml, .yaml)
                     </SelectItem>
                     <SelectItem value=".yaml-base64-value">
-                        .yaml-base64-value
+                        .yaml-base64-value (ex: Dockerfile, Dockercompose, .yml, .yaml)
                     </SelectItem>
                     <SelectItem value="config.go">
                         config in .go file
@@ -93,16 +93,16 @@ export default function Home() {
                 </SelectTrigger>
                 <SelectContent className="full-w">
                     <SelectItem value=".env">
-                        .env
+                        .env (ex: config file in nodejs, go, Laravel, python)
                     </SelectItem>
                     <SelectItem value=".properties" >
-                        .properties
+                        .properties (ex: config file in Spring)
                     </SelectItem>
                     <SelectItem value=".yaml">
-                        .yaml
+                        .yaml (ex: Dockerfile, Dockercompose, .yml, .yaml)
                     </SelectItem>
                     <SelectItem value=".yaml-base64-value">
-                        .yaml-base64-value
+                        .yaml-base64-value (ex: Dockerfile, Dockercompose, .yml, .yaml)
                     </SelectItem>
                     <SelectItem value="config.go">
                         config in .go file
