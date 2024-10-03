@@ -76,7 +76,6 @@ export default function Home() {
             <Input
                 placeholder="Upload File"
                 type="file"
-                accept=".yaml, .env, .go, .properties"
                 onChange={(event) => loadFromFile(event, setConfig1)} />
             <Textarea
                 className="p-2 border rounded mt-2"
@@ -115,7 +114,6 @@ export default function Home() {
             <Input
                 placeholder="Upload File"
                 type="file"
-                accept=".yaml, .env, .go, .properties"
                 onChange={(event) => loadFromFile(event, setConfig2)} />
             <Textarea
                 className="p-2 border rounded mt-2"
